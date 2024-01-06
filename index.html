@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container text-center mt-5">
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Add User</h3>
+                
+                    </div>
+                    <div class="card-body">
+                        <form id="userForm" action="http://127.0.0.1:4000/add" method="post">
+                            <!-- Form fields go here, as in the previous example -->
+                            <div class="form-group">
+                                <label for="name">Name:</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="surname">Surname:</label>
+                                <input type="text" class="form-control" id="surname" name="surname" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block" id="submit">Add User</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Updated User List</h3>
+                    </div>
+                    <div class="card-body" id="userList">
+                        <!-- User list will be displayed here after the GET request -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+       const userForm = document.getElementById('userForm');
+        const userList = document.getElementById('userList');
+        const button = document.getElementById('submit')
+        
+
+          // Function to fetch and display the updated user list
+          async function fetchUserList() {
+            try {
+                console.log("Fetching all users for reloading")
+                const response = await fetch('http://127.0.0.1:4000/all');
+                const users = await response.json();
+                console.log(users)
+
+                // Display the updated user list
+                userList.innerHTML = '<ul>' + users.map(user => `<li>${user.name} ${user.surname} - ${user.email}</li>`).join('') + '</ul>';
+            } catch (error) {
+                console.error('An error occurred while fetching the user list:', error);
+            }
+        }
+
+        // Execute the fetchUserList function when the page loads
+        window.addEventListener('load', fetchUserList);
+
+
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(userForm);
+            const userData = {};
+            formData.forEach((value, key) => {
+                userData[key] = value;
+            });
+
+            // Construct a URL with query parameters
+            const url = new URL('http://127.0.0.1:4000/add');
+            url.search = new URLSearchParams(userData).toString();
+
+            // Send a POST request with query parameters
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                });
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+            finally{
+                window.location.reload();
+            }
+
+        });
+    </script>
+</body>
+</html>
