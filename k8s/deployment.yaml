@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-user-management
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: node-user-management
+  template:
+    metadata:
+      labels:
+        app: node-user-management
+    spec:
+      containers:
+      - name: node-user-management
+        image: ghcr.io/whirlinginrags/node-user-management:latest
+        ports:
+        - containerPort: 3000

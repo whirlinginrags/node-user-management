@@ -42,14 +42,15 @@ const connectWithRetry = async () => {
   }
 
   // Define a route to retrieve all users
-  app.get('/all', (req, res) => {
-    connection.query(
-      'SELECT * FROM `user`',
-      function(err, results, fields) {
-        console.log(results); // results contains rows returned by server
-        res.status(200).json(results);
-      }
-    ) 
+  app.get('/all', async (req, res) => {
+    try {
+      const [results, fields] = await connection.query('SELECT * FROM `user`');
+      console.log(results); // results contains rows returned by server
+      res.status(200).json(results);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server error');
+    }
   });
 
   app.get('/', (req, res) => {
@@ -60,15 +61,20 @@ const connectWithRetry = async () => {
     res.sendStatus(200);
   });
 
-  app.post('/add', (req, res) => {
+  app.post('/add', async (req, res) => {
     const { name, surname, email, password } = req.query;
 
-    connection.query('INSERT INTO user (name, surname, email, password) VALUES (?,?,?,?)', [name, surname, email, password],(error, results) => {
-      if (error){
-        return res.status(500).json({ error: error });
+    try {
+      await connection.query('INSERT INTO user (name, surname, email, password) VALUES (?,?,?,?)', [name, surname, email, password]);
+      res.sendStatus(200);
+    } catch (error) {
+      console.error(error);
+      if (error.code === 'ER_DUP_ENTRY') {
+        res.status(400).json({ error: 'A user with this email already exists.' });
+      } else {
+        res.status(500).json({ error: 'An error occurred while creating the user.' });
       }
-    });
-    res.sendStatus(200);
+    }
   });
 
   app.listen(port, () => {
