@@ -15,7 +15,9 @@ spec:
       containers:
       - name: node-user-management
         image: ghcr.io/whirlinginrags/node-user-management:latest
-      imagePullSecrets:
-      - name: regcred
+        command: ["node", "server.js"]
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
+      imagePullSecrets:
+      - name: regcred
